@@ -34,18 +34,57 @@ constraint forall([ fox[i] + geese[i] + corn[i] <= k |i in Trips]);
 % Third constraint is the fact that objects are moving from each side of the river when carried on the boat
 
 % Moving objects from the right side of the river to the left side
-constraint forall([foxCount[1,i] == foxCount[1, i-1] + fox[i] /\ foxCount[2, i] == foxCount[2, i-1] - fox[i] | i in 1..trips where i mod 2 == 0]);
 
-constraint forall([geeseCount[1,i] == geeseCount[1, i-1] + geese[i] /\ geeseCount[2, i] == geeseCount[2, i-1] - geese[i] | i in 1..trips where i mod 2 == 0]);
+predicate deaths(var 0..f: lf, var 0..g: lg, var 0..c: lc, 
+                 var 0..f: df, var 0..g: dg, var 0..c: dc) =             
+     df = 0 /\ dg = 0 /\ dc = 0 
+;
 
-constraint forall([cornCount[1,i] == cornCount[1, i-1] + corn[i] /\ cornCount[2, i] == cornCount[2, i-1] - corn[i] | i in 1..trips where i mod 2 == 0]);
 
-% Moving objects from the left side of the river to the right side
-constraint forall([foxCount[2,i] == foxCount[2, i-1] + fox[i] /\ foxCount[1, i] == foxCount[1, i-1] - fox[i] | i in 1..trips where i mod 2 == 1]);
 
-constraint forall([geeseCount[2,i] == geeseCount[2, i-1] + geese[i] /\ geeseCount[1, i] == geeseCount[1, i-1] - geese[i] | i in 1..trips where i mod 2 == 1]);
 
-constraint forall([cornCount[2,i] == cornCount[2, i-1] + corn[i] /\ cornCount[1, i] == cornCount[1, i-1] - corn[i] | i in 1..trips where i mod 2 == 1]);
+predicate arrived(Trips: tripNumber, 1..2: side) =
+     let {
+       var 0..f: fbefore = foxCount[side, tripNumber-1],
+       var 0..g: gbefore = geeseCount[side, tripNumber-1],
+       var 0..c: cbefore = cornCount[side, tripNumber-1,],
+       var 0..f: fafter = foxCount[side,tripNumber], 
+       var 0..g: gafter = geeseCount[side,tripNumber],
+       var 0..c: cafter = cornCount[side,tripNumber],
+     } in 
+     fafter = fbefore + fox[tripNumber] /\
+     gafter = gbefore + geese[tripNumber] /\
+     cafter = cbefore + corn[tripNumber]
+;
+
+predicate departured(Trips: tripNumber, 1..2: side) =
+    let {
+       var 0..f: fbefore = foxCount[side, tripNumber-1],
+       var 0..g: gbefore = geeseCount[side, tripNumber-1],
+       var 0..c: cbefore = cornCount[side, tripNumber-1,],
+       var 0..f: fafter = foxCount[side,tripNumber], 
+       var 0..g: gafter = geeseCount[side,tripNumber],
+       var 0..c: cafter = cornCount[side,tripNumber],
+       var 0..f: fleft, var 0..g: gleft, var 0..c: cleft,
+       var 0..f: fdeaths, var 0..g: gdeaths, var 0..c: cdeaths
+     } in 
+     
+      fleft = fbefore - fox[tripNumber] /\
+      gleft = gbefore - geese[tripNumber] /\
+      cleft = cbefore - corn[tripNumber] /\
+      deaths(fleft, gleft, cleft, fdeaths, gdeaths, cdeaths) /\
+      fafter = fleft - fdeaths /\ 
+      gafter = gleft - gdeaths /\
+      cafter = cleft - cdeaths
+;   
+
+constraint forall(trip in Trips where trip mod 2 = 1)(
+   arrived(trip, 2) /\ departured(trip, 1)
+);
+
+constraint forall(trip in Trips where trip mod 2 = 0)(
+   arrived(trip, 1) /\ departured(trip, 2)
+);
 
 %Fourth Constraint shows that the simulation starts with all objects and the boat being on the left side
 constraint foxCount[1,0] = f;
@@ -68,8 +107,8 @@ maximize obj;
 %%% Output
 % This output should reflect the optimal solution presented in handout.pdf
 output[
-        "Fox:" ++ show(foxCount[2,trips]) ++ "\n" ++
-        "Geese:" ++ show(geeseCount[2,trips]) ++ "\n" ++
-        "Corn:" ++ show(cornCount[2,trips]) ++ "\n" ++
+        "Fox    :" ++ show(fox) ++ "\n" ++
+        "Geese:" ++ show(geese) ++ "\n" ++
+        "Corn:  " ++ show(corn) ++ "\n" ++
         "Trips:" ++ show(trips) ++ "\n" ++
-        "Obj:" ++ show(obj)]
+        "obj = " ++ show(obj) ++ ";"]
