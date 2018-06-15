@@ -19,9 +19,9 @@ var int: obj;
 var 1..t: trips;
 
 %%% We are still declaring variables. Within the array, the value 1 will represent the left side of the river whereas the value 2 will represent the right side of the river. The following variables represent the numerical value of each after object after every trip.
-array[1..2, 0..t] of var 0..t: cornCount;
-array[1..2, 0..t] of var 0..t: geeseCount;
-array[1..2, 0..t] of var 0..t: foxCount;
+array[1..2, 0..t] of var 0..c: cornCount;
+array[1..2, 0..t] of var 0..g: geeseCount;
+array[1..2, 0..t] of var 0..f: foxCount;
 
 %%% We will now add some constraints
 
@@ -37,9 +37,21 @@ constraint forall([ fox[i] + geese[i] + corn[i] <= k |i in Trips]);
 
 predicate deaths(var 0..f: lf, var 0..g: lg, var 0..c: lc, 
                  var 0..f: df, var 0..g: dg, var 0..c: dc) =             
-     df = 0 /\ dg = 0 /\ dc = 0 
+     
+      if lf > 0 /\ lc > 0 /\ lg=0 then 
+       df=1 /\ dc=1 /\ dg=0
+      elseif lf > lg /\ lg > 0  then
+       dg = 0 /\ df = 1 /\ dc = 0
+      elseif lf <= lg /\ lf > 0 then
+       df=0 /\ dg=lf /\ dc=0
+      elseif lf = 0 /\ lg <= lc /\ lg > 0 then
+      df = 0 /\ dg = 0 /\ dc = lg
+      elseif lf = 0 /\ lg > lc /\ lc > 0 then  
+      df = 0 /\ dg = 1 /\ dc = 1
+      else
+        dg = 0 /\ df = 0 /\ dc = 0
+endif
 ;
-
 
 
 
@@ -87,12 +99,15 @@ constraint forall(trip in Trips where trip mod 2 = 0)(
 );
 
 %Fourth Constraint shows that the simulation starts with all objects and the boat being on the left side
+
 constraint foxCount[1,0] = f;
 constraint foxCount[2,0] = 0;
-constraint geeseCount[1,0] = g;
-constraint geeseCount[2,0] = 0;
-constraint cornCount[1,0] = c;
-constraint cornCount[2,0] = 0;
+ constraint geeseCount[1,0] = g;
+ constraint geeseCount[2,0] = 0;
+ constraint cornCount[1,0] = c;
+ constraint cornCount[2,0] = 0;
+
+
 
 %Fifth Constraint shows the amount of points received from transporting each object to the other side successfully
 constraint obj = foxCount[2,trips] * pf +
@@ -101,14 +116,15 @@ constraint obj = foxCount[2,trips] * pf +
 
 %%% Solve
 % Taken from handout.pdf
-solve :: int_search([trips], input_order, indomain_min, complete)
-maximize obj;
+% Previous solver taken from handout.pdf
+solve :: int_search([trips], input_order, indomain_median, complete) maximize obj;
+
 
 %%% Output
 % This output should reflect the optimal solution presented in handout.pdf
 output[
-        "Fox    :" ++ show(fox) ++ "\n" ++
-        "Geese:" ++ show(geese) ++ "\n" ++
-        "Corn:  " ++ show(corn) ++ "\n" ++
-        "Trips:" ++ show(trips) ++ "\n" ++
-        "obj = " ++ show(obj) ++ ";"]
+        "fox = ", show(fox), 
+        ";\ngeese = ", show(geese),
+        ";\ncorn =  ", show(corn),
+        ";\ntrips = ", show(trips),
+        ";\nobj = ", show(obj), ";\n"];
