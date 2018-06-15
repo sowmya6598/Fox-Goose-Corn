@@ -25,13 +25,13 @@ array[1..2, 0..t] of var 0..f: foxCount;
 
 %%% We will now add some constraints
 
+function var int: total_value(var 1..2: s, var int: i) = foxCount[s, i] * pf + geeseCount[s, i] * pg + cornCount[s, i] * pc;
+
 %% First Constraint must be that the number of trips should be odd. Assuming that we travel from the left side first, examples of combinations would be going right OR going right-left-right OR going right-left-right-left-right -- all odd number of trips.
 constraint trips mod 2 == 1;
 
 %% Second constraint is that there is only one existance of each object
 constraint forall([ fox[i] + geese[i] + corn[i] <= k |i in Trips]);
-
-% Third constraint is the fact that objects are moving from each side of the river when carried on the boat
 
 % Moving objects from the right side of the river to the left side
 
@@ -52,7 +52,6 @@ predicate deaths(var 0..f: lf, var 0..g: lg, var 0..c: lc,
         dg = 0 /\ df = 0 /\ dc = 0
 endif
 ;
-
 
 
 predicate arrived(Trips: tripNumber, 1..2: side) =
@@ -98,7 +97,7 @@ constraint forall(trip in Trips where trip mod 2 = 0)(
    arrived(trip, 1) /\ departured(trip, 2)
 );
 
-%Fourth Constraint shows that the simulation starts with all objects and the boat being on the left side
+%Third Constraint shows that the simulation starts with all objects and the boat being on the left side
 
 constraint foxCount[1,0] = f;
 constraint foxCount[2,0] = 0;
@@ -107,12 +106,17 @@ constraint foxCount[2,0] = 0;
  constraint cornCount[1,0] = c;
  constraint cornCount[2,0] = 0;
 
-
-
-%Fifth Constraint shows the amount of points received from transporting each object to the other side successfully
+%Fourth Constraint shows the amount of points received from transporting each object to the other side successfully
 constraint obj = foxCount[2,trips] * pf +
                  geeseCount[2,trips] * pg +
                  cornCount[2, trips] * pc;
+                 
+
+
+%Helps with the overall performance
+constraint forall([(fox[i] + geese[i] + corn[i]) > 0 | i in 1..trips where i mod 2 == 1]);
+constraint forall([not (fox[i] == fox[i-1] /\ geese[i] == geese[i-1] /\ corn[i] == corn[i-1])| i in 2..trips where i mod 2 == 0]);
+constraint forall([total_value(2, i) > total_value(2, i-2) | i in 2..trips where i mod 2 == 0]);
 
 %%% Solve
 % Taken from handout.pdf
