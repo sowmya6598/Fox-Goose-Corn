@@ -1,2 +1,6 @@
-Fox Geese Corn - River Crossing Puzzle
+# Fox Geese Corn 
+
+#### Modeling Discrete Optimization - River Crossing Puzzle
+
+
 
