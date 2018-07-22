@@ -9,7 +9,7 @@ int: pf;
 int: pg;
 int: pc;
 
-% We will now declare the variables
+% We will now declare the variables 
 
 array[Trips] of var 0..c: corn;
 array[Trips] of var 0..g: geese;
