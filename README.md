@@ -2,7 +2,7 @@
 
 #### Modeling Discrete Optimization - River Crossing Puzzle
 
-[Project Summary](fox-geese-corn/handout.pdf)
+[Project Summary](https://github.com/sowmya6598/fox-geese-corn/blob/master/handout.pdf)
 
 
 
