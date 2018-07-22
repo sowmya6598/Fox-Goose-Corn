@@ -18,7 +18,9 @@ array[Trips] of var 0..f: fox;
 var int: obj;
 var 1..t: trips;
 
-% We are still declaring variables. Within the array, the value 1 will represent the left side of the river whereas the value 2 will represent the right side of the river. The following variables represent the numerical value of each after object after every trip.
+% We are still declaring variables. Within the array, the value 1 will represent the left side of the river 
+whereas the value 2 will represent the right side of the river. The following variables represent the numerical 
+value of each after object after every trip.
 
 array[1..2, 0..t] of var 0..c: cornCount;
 array[1..2, 0..t] of var 0..g: geeseCount;
@@ -28,7 +30,9 @@ array[1..2, 0..t] of var 0..f: foxCount;
 
 function var int: total_value(var 1..2: s, var int: i) = foxCount[s, i] * pf + geeseCount[s, i] * pg + cornCount[s, i] * pc;
 
-% First Constraint must be that the number of trips should be odd. Assuming that we travel from the left side first, examples of combinations would be going right OR going right-left-right OR going right-left-right-left-right -- all odd number of trips.
+% First Constraint must be that the number of trips should be odd. Assuming that we travel from the left side 
+first, examples of combinations would be going right OR going right-left-right OR going right-left-right-left-right -- all 
+odd number of trips.
 
 constraint trips mod 2 == 1;
 
